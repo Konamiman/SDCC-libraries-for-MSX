@@ -22,7 +22,7 @@ void UnapiBuildCodeBlock(char* implIdentifier, int implIndex, unapi_code_block* 
 	regs.Bytes.A = implIndex;
 	regs.Words.DE = 0x2222;
 
-	if(implIdentifier != NULL) {	
+	if(implIdentifier != null) {	
 		arg=(char*)0xF847;
 		while(*arg++ = *implIdentifier++); //This is just a funny strcpy
 	}
@@ -69,7 +69,7 @@ void UnapiBuildCodeBlock(char* implIdentifier, int implIndex, unapi_code_block* 
 		codeBlock->UnapiReadCode[8] = Z80_JP;
 		*(uint*)&(codeBlock->UnapiReadCode[9]) = RDSLT;
 	} else {
-		UnapiGetRamHelper(&ramHelperAddress, NULL);
+		UnapiGetRamHelper(&ramHelperAddress, null);
 		*(uint*)&(codeBlock->UnapiCallCode[9]) = ramHelperAddress;
 
 		codeBlock->UnapiReadCode[8] = Z80_LD_B;

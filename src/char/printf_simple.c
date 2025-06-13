@@ -30,8 +30,7 @@
 
 #include <stdarg.h>
 
-// Defined in putchar_msxdos.asm and putchar_msxbasic.asm
-extern void putchar_e(int);
+extern void putchar(int);
 
 #ifdef SUPPORT_LONG
 extern void __ultoa(long val, char* buffer, char base);
@@ -61,14 +60,15 @@ static void do_char(char c) __naked
   __asm
 
   ld c,a
-  ld hl,(_bufPnt)
-  ld a,h
-  or l
-  ld e,c
-  jp z,_putchar_e
-  ld (hl),e
-  inc hl
-  ld (_bufPnt),hl
+  ld de,(_bufPnt)
+  ld a,d
+  or e
+  ld l,c
+  jp z,_putchar
+  ld a,l
+  ld (de),a
+  inc de
+  ld (_bufPnt),de
   ret
 
   __endasm;

@@ -1,21 +1,15 @@
 ; Base64 library for SDCC
 ; By Konamiman, 8/2010
 ;
-; Assemble with:
-; sdasz80 -o base64.asm
+; Assemble with either sdasz80 or Nestor80 (version 1.3.4 or newer):
+;
+; sdasz80 -o base64.rel base64.asm
 
 	.area	_CODE
 
 ;void Base64Init(byte charsPerLine)
 
 _Base64Init::
-	ifdef SDCC_CALL_0
-
-	ld	hl,2
-	add	hl,sp
-	ld	a,(hl)
-
-	endif
 
 ;--- B64_INIT: Initialize the Base64 engine
 ;    Input:  A=Number of characters per line
@@ -28,13 +22,13 @@ DO_B64_INIT:
 	or	a
 	jr	z,B64_INIT2
 
-	cp	a,4
+	cp	a,#4
 	jr	nc,B64_INIT1
-	ld	a,4
+	ld	a,#4
 B64_INIT1:
 	sra	a	;Converts to groups of 4
 	sra	a
-	and	00111111i
+	and	#0b00111111
 
 B64_INIT2:
 	ld	(B64_CRINT),a
@@ -42,9 +36,9 @@ B64_INIT2:
 	xor	a
 	ld	(B64_TEMPLON),a
 	ld	(B64_DEC_FIN),a
-	ld	hl,B64_INTEMP
+	ld	hl,#B64_INTEMP
 	ld	(B64_DEC_PNT),hl
-	ld	hl,0
+	ld	hl,#0
 	ld	(B64_TOTLEN),hl
 	ld	(B64_TOTLEN+2),hl
 	ld	(B64_INTEMP),hl
@@ -59,36 +53,29 @@ B64_INIT2:
 
 _Base64EncodeChunk::
 	push	ix
-	ld	ix,4
+	ld	ix,#4
 	add	ix,sp
-
-	ifdef SDCC_CALL_0
-
-	ld	l,(ix)
-	ld	h,(ix+1)
-	ld	e,(ix+2)
-	ld	d,(ix+3)
-	ld	c,(ix+4)
-	ld	b,(ix+5)
-	ld	a,(ix+6)
-
-	else
-
 	ld	c,(ix)
-	ld	b,(ix+1)
-	ld	a,(ix+2)
-
-	endif
-
+	ld	b,1(ix)
+	ld	a,2(ix)
 	push	hl
 	pop	ix
 	push	de
 	pop	iy
 	rra
 	call	_B64_ENCB
-	ld	h,b
-	ld	l,c
+	ld	d,b
+	ld	e,c
 	pop	ix
+
+	; In SDCC with calling convention 1 the calle is responsible
+	; for cleaning up the stack before returning
+	pop hl
+	inc sp ;remove "length" and "final"
+	inc sp
+	inc sp
+	push hl
+
 	ret
 
 
@@ -109,7 +96,7 @@ _Base64EncodeChunk::
 ;    Modifies: AF, BC, DE, HL, IX, IY
 
 _B64_ENCB:
-	ld	a,0
+	ld	a,#0
 	rla
 	ld	(B64_IS_FINAL),a	;1 if final block, 0 if not
 	push	iy
@@ -119,13 +106,13 @@ _B64_ENCB:
 	ld	a,(B64_TEMPLON)
 	or	a
 	jr	z,B64_ENCLOOP
-	cp	2
+	cp	#2
 	jr	z,B64_ENC_PRV2
 
 	;Previous state is 1 byte
 
 	ld	a,(B64_INTEMP)
-	ld	(ix-1),a
+	ld	-1(ix),a
 	dec	ix
 	inc	bc
 	jr	B64_ENCLOOP
@@ -134,9 +121,9 @@ _B64_ENCB:
 
 B64_ENC_PRV2:
 	ld	a,(B64_INTEMP)
-	ld	(ix-2),a
+	ld	-2(ix),a
 	ld	a,(B64_INTEMP+1)
-	ld	(ix-1),a
+	ld	-1(ix),a
 	dec	ix
 	dec	ix
 	inc	bc
@@ -150,9 +137,9 @@ B64_ENCLOOP:
 	ld	a,c
 	or	a
 	jr	z,B64ENC_LAST0
-	cp	1
+	cp	#1
 	jr	z,B64ENC_LAST1
-	cp	2
+	cp	#2
 	jr	z,B64ENC_LAST2
 
 	;--- Encodes normal block
@@ -177,8 +164,8 @@ B64ENC_NOFIN:
 
 	ld	a,(B64_CRINT)
 	ld	(B64_CRCNT),a
-	ld	(iy),13
-	ld	(iy+1),10
+	ld	(iy),#13
+	ld	1(iy),#10
 	inc	iy
 	inc	iy
 	jr	B64_ENCLOOP
@@ -199,7 +186,7 @@ B64ENC_LAST1:	ld	a,(B64_IS_FINAL)
 B64ENC_L1_2:
 	ld	a,(ix)
 	ld	(B64_INTEMP),a
-	ld	a,1
+	ld	a,#1
 	ld	(B64_TEMPLON),a
 	inc	ix
 	jr	B64_ENC_END
@@ -221,9 +208,9 @@ B64ENC_LAST2:
 B64_L2_2:
 	ld	a,(ix)
 	ld	(B64_INTEMP),a
-	ld	a,(ix+1)
+	ld	a,1(ix)
 	ld	(B64_INTEMP+1),a
-	ld	a,2
+	ld	a,#2
 	ld	(B64_TEMPLON),a
 	inc	ix
 	inc	ix
@@ -266,7 +253,7 @@ B64_ENC3:
 	ld	a,(ix)
 	sra	a
 	sra	a
-	and	00111111i
+	and	#0b00111111
 	call	GETB64CHAR
 	ld	(iy),a
 
@@ -275,35 +262,35 @@ B64_ENC3:
 	sla	a
 	sla	a
 	sla	a
-	and	00110000i
+	and	#0b00110000
 	ld	b,a
-	ld	a,(ix+1)
+	ld	a,1(ix)
 	sra	a
 	sra	a
 	sra	a
 	sra	a
-	and	00001111i
+	and	#0b00001111
 	or	b
 	call	GETB64CHAR
-	ld	(iy+1),a
+	ld	1(iy),a
 
-	ld	a,(ix+1)
+	ld	a,1(ix)
 	sla	a
 	sla	a
-	and	00111100i
+	and	#0b00111100
 	ld	b,a
-	ld	a,(ix+2)
+	ld	a,2(ix)
 	rlca
 	rlca
-	and	00000011i
+	and	#0b00000011
 	or	b
 	call	GETB64CHAR
-	ld	(iy+2),a
+	ld	2(iy),a
 
-	ld	a,(ix+2)
-	and	00111111i
+	ld	a,2(ix)
+	and	#0b00111111
 	call	GETB64CHAR
-	ld	(iy+3),a
+	ld	3(iy),a
 
 	inc	ix
 B64_ENCEND2:
@@ -328,7 +315,7 @@ B64_ENC1:
 	ld	a,(ix)
 	sra	a
 	sra	a
-	and	00111111i
+	and	#0b00111111
 	call	GETB64CHAR
 	ld	(iy),a
 
@@ -337,12 +324,12 @@ B64_ENC1:
 	sla	a
 	sla	a
 	sla	a
-	and	00110000i
+	and	#0b00110000
 	call	GETB64CHAR
-	ld	(iy+1),a
+	ld	1(iy),a
 
-	ld	(iy+2),61	;"="
-	ld	(iy+3),61	;"="
+	ld	2(iy),#61	;"="
+	ld	3(iy),#61	;"="
 	jr	B64_ENCEND1
 
 
@@ -357,7 +344,7 @@ B64_ENC2:
 	ld	a,(ix)
 	sra	a
 	sra	a
-	and	00111111i
+	and	#0b00111111
 	call	GETB64CHAR
 	ld	(iy),a
 
@@ -366,26 +353,26 @@ B64_ENC2:
 	sla	a
 	sla	a
 	sla	a
-	and	00110000i
+	and	#0b00110000
 	ld	b,a
-	ld	a,(ix+1)
+	ld	a,1(ix)
 	sra	a
 	sra	a
 	sra	a
 	sra	a
-	and	00001111i
+	and	#0b00001111
 	or	b
 	call	GETB64CHAR
-	ld	(iy+1),a
+	ld	1(iy),a
 
-	ld	a,(ix+1)
+	ld	a,1(ix)
 	sla	a
 	sla	a
-	and	00111100i
+	and	#0b00111100
 	call	GETB64CHAR
-	ld	(iy+2),a
+	ld	2(iy),a
 
-	ld	(iy+3),61	;"="
+	ld	3(iy),#61	;"="
 	jr	B64_ENCEND2
 
 
@@ -395,33 +382,13 @@ _Base64DecodeChunk::
 	push	ix
 	ld	ix,#4
 	add	ix,sp
-
-	ifdef SDCC_CALL_0
-
-	ld	l,(ix)
-	ld	h,(ix+1)
-	ld	e,(ix+2)
-	ld	d,(ix+3)
-	ld	c,(ix+4)
-	ld	b,(ix+5)
-	ld	a,(ix+6)
-	push	de
-	pop	iy
-	ld	e,(ix+7)
-	ld	d,(ix+8)
-
-	else
-	
 	ld	c,(ix)
-	ld	b,(ix+1)
-	ld	a,(ix+2)
+	ld	b,1(ix)
+	ld	a,2(ix)
 	push	de
 	pop	iy
-	ld	e,(ix+3)
-	ld	d,(ix+4)
-
-	endif
-
+	ld	e,3(ix)
+	ld	d,4(ix)
 	push	de
 	push	hl
 	pop	ix
@@ -429,12 +396,23 @@ _Base64DecodeChunk::
 	call	_B64_DECB
 	pop	de
 	jr	c,DECERR
-	ld	a,1
+	ld	a,#1
 DECERR:	dec	a
 	ld	(de),a
-	ld	h,b
-	ld	l,c
+	ld	d,b
+	ld	e,c
 	pop	ix
+
+	; In SDCC with calling convention 1 the calle is responsible
+	; for cleaning up the stack before returning
+	pop hl
+	inc sp ;remove "length", "final" and "error"
+	inc sp
+	inc sp
+	inc sp
+	inc sp
+	push hl
+	
 	ret
 
 
@@ -457,7 +435,7 @@ DECERR:	dec	a
 ;    Modifies: AF, BC, DE, HL, IX, IY
 
 _B64_DECB:
-	ld	a,0
+	ld	a,#0
 	rla
 	ld	(B64_IS_FINAL),a	;1 if final, 0 if not
 	ld	(B64_DEC_IY),iy
@@ -468,7 +446,7 @@ B64_DECLOOP:
 	;* If a full 4 characters group is available, decode it
 
 	ld	a,(B64_TEMPLON)
-	cp	4
+	cp	#4
 	jr	nz,B64_DECLOOP2
 
 	exx
@@ -476,17 +454,17 @@ B64_DECLOOP:
 	exx
 	xor	a
 	ld	(B64_TEMPLON),a
-	ld	hl,B64_INTEMP
+	ld	hl,#B64_INTEMP
 	ld	(B64_DEC_PNT),hl
 
 	ld	a,(B64_TEMPLON+2)
-	cp	0xFF
+	cp	#0xFF
 	jr	nz,B64_DECLOOP2
 	ld	a,(B64_TEMPLON+3)
-	cp	0xFF
+	cp	#0xFF
 	jr	nz,B64_DECLOOP2
 	ld	(B64_DEC_FIN),a
-B64_DECLOOP2:
+B64_DECLOOP2:	;
 
 	;* If no input characters left, terminate
 
@@ -502,13 +480,13 @@ B64_DEC_NEXT:	ld	a,b
 
 	;* Ignorable character?
 
-	cp	9	;TAB
+	cp	#9	;TAB
 	jr	z,B64_DEC_NEXT
-	cp	32	;SPC
+	cp	#32	;SPC
 	jr	z,B64_DEC_NEXT
-	cp	13	;CR
+	cp	#13	;CR
 	jr	z,B64_DEC_NEXT
-	cp	10	;LF
+	cp	#10	;LF
 	jr	z,B64_DEC_NEXT
 
 	;If a "=" character was poresent in the last decoded group,
@@ -524,14 +502,14 @@ B64_DEC_NEXT:	ld	a,b
 	;  - Not the final block; or
 	;  - Not at least 2 characters in B64_INTEMP
 
-	cp	61	;"="
+	cp	#61	;"="
 	jr	nz,B64_DECLOOP3
 
 	ld	a,(B64_TEMPLON)
-	cp	2
+	cp	#2
 	jr	c,B64_DEC_ER3
 
-	ld	a,0xFF
+	ld	a,#0xFF
 	jr	B64_DECLOOP4
 
 	;* Try to decode character, if success, store it
@@ -546,7 +524,7 @@ B64_DECLOOP4:
 	ld	(hl),a
 	inc	hl
 	ld	(B64_DEC_PNT),hl
-	ld	hl,B64_TEMPLON
+	ld	hl,#B64_TEMPLON
 	inc	(hl)
 	jr	B64_DECLOOP
 
@@ -574,18 +552,18 @@ B64_DEC_END:
 	or	a
 	ret	z
 
-	ld	a,2
+	ld	a,#2
 	scf
 	ret
 
 	;--- Error 3
 
 B64_DEC_ER3:
-	ld	a,3
+	ld	a,#3
 	scf
 	ret
 
-B64_DEC_IY:	dw	0
+B64_DEC_IY:	.dw	#0
 
 
 ;--- B64_DEC4: Decode a Base64 4 characters group
@@ -602,19 +580,19 @@ B64_DEC4:
 	ld	a,l
 	sla	a
 	sla	a
-	and	11111100i
+	and	#0b011111100
 	ld	b,a
 	ld	a,h
 	sra	a
 	sra	a
 	sra	a
 	sra	a
-	and	00000011i
+	and	#0b00000011
 	or	b
 	ld	(iy),a
 
 	ld	a,e
-	cp	0xFF
+	cp	#0xFF
 	jr	z,B64_DEC4_END1
 
 	ld	a,h
@@ -622,28 +600,28 @@ B64_DEC4:
 	sla	a
 	sla	a
 	sla	a
-	and	11110000i
+	and	#0b011110000
 	ld	b,a
 	ld	a,e
 	sra	a
 	sra	a
-	and	00001111i
+	and	#0b00001111
 	or	b
-	ld	(iy+1),a
+	ld	1(iy),a
 
 	ld	a,d
-	cp	0xFF
+	cp	#0xFF
 	jr	z,B64_DEC4_END2
 
 	ld	a,e
 	rrca
 	rrca
-	and	11000000i
+	and	#0b11000000
 	ld	b,a
 	ld	a,d
-	and	00111111i
+	and	#0b00111111
 	or	b
-	ld	(iy+2),a
+	ld	2(iy),a
 
 	inc	iy
 B64_DEC4_END2:
@@ -659,9 +637,9 @@ B64_DEC4_END1:
 ;    Modifies: AF, HL, BC
 
 GETB64CHAR:
-	ld	hl,B64TABLE
+	ld	hl,#B64TABLE
 	ld	c,a
-	ld	b,0
+	ld	b,#0
 	add	hl,bc
 	ld	a,(hl)
 	ret
@@ -673,10 +651,10 @@ GETB64CHAR:
 ;    Modifies: AF, HL, BC
 
 GETB64INDEX:
-	ld	hl,B64TABLE+63
-	ld	bc,64
+	ld	hl,#B64TABLE+#63
+	ld	bc,#64
 	cpdr
-	ld	a,0xFF
+	ld	a,#0xFF
 	ret	nz
 	ld	a,c
 	ret
@@ -702,17 +680,15 @@ B64_INCTLEN:
 ;--- Variables
 
 B64TABLE:
-	db	65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90  ;"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	db	97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122 ;"abcdefghijklmnopqrstuvwxyz"
-	db	48,49,50,51,52,53,54,55,56,57,43,47	;"0123456789+/"
-B64_CRINT:	db	0	;Encoded line length, in groups of 4
+	.db	65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90  ;"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	.db	97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122 ;"abcdefghijklmnopqrstuvwxyz"
+	.db	48,49,50,51,52,53,54,55,56,57,43,47	;"0123456789+/"
+B64_CRINT:	.db	0	;Encoded line length, in groups of 4
 				;(0 = do not insert line breaks)
-B64_CRCNT:	db	0	;Counter for inserting CRLF
-B64_INTEMP:	ds	4	;For temporary storage of an incomplete group
-B64_TEMPLON:	db	0	;Incomplete group length
-B64_DEC_PNT:	dw	0	;Pointer for filling B64_INTEMP when decoding
-B64_TOTLEN:	ds	4	;Total accumulated length of output blocks
-B64_IS_FINAL:	db	0
-B64_DEC_FIN:	db	0
-
-	end
+B64_CRCNT:	.db	0	;Counter for inserting CRLF
+B64_INTEMP:	.ds	4	;For temporary storage of an incomplete group
+B64_TEMPLON:	.db	0	;Incomplete group length
+B64_DEC_PNT:	.dw	0	;Pointer for filling B64_INTEMP when decoding
+B64_TOTLEN:	.ds	4	;Total accumulated length of output blocks
+B64_IS_FINAL:	.db	0
+B64_DEC_FIN:	.db	0

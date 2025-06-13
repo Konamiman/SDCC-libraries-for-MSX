@@ -1,9 +1,9 @@
-/* Example of application using ASMLIB, the SDCC ASM interop library
+/* Example of application using ASM library, the SDCC ASM interop library
    By Konamiman 2/2010
    
    This application displays the contents of the file specified at command line,
    much like the COMMAND.COM command TYPE, but replacing non-printable
-   control characters into dots.
+   control characters with dots.
    
    Accessing the file and the screen is done exclusively via MSX-DOS
    function calls, the C standard libraries are not used
@@ -12,22 +12,25 @@
    To keep things simple it works on MSX-DOS 2 only.
   
    Compilation command line:
-   sdcc --code-loc 0x180 --data-loc 0 -mz80 --disable-warning 196 --no-std-crt0 crt0msx_msxdos_advanced.rel asm.lib c-type.c
-   hex2bin -e com c-type.ihx
+
+   sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 --disable-warning 196 crt0_msxdos.rel asm_call.rel DosCall.rel c-type.c
+   objcopy -I ihex -O binary c-type.ihx ctype.com
 */
 
-#include "asm.h"
-
+#include "../src/asm/asm.h"
+#include "../src/types.h"
 
 #define Buffer ((byte*)0x8000)
 #define BufferSize ((uint)16384)
 
 #define CR 13
 #define LF 10
-#define TAB 8
+#define TAB 9
+#define SPACE 32
 #define BS 127
+#define EOF 0x1A
 
-#define EOF  0xC7
+#define ERR_EOF  0xC7
 
 
 /**********************************
@@ -92,10 +95,10 @@
  *********************/
 
 const char* strInfo=
-    "Print file using SDCC ASMLIB 1.0\r\n"
+    "Print file using SDCC ASM library 1.0\r\n"
     "By Konamiman, 2/2010\r\n"
     "\r\n"
-    "Usage: c-type <filename>\r\n";
+    "Usage: ctype <filename>\r\n";
 
 const char* strNeedsDOS2=
     "\r\n*** This program requires MSX-DOS 2 to run.\r\n";
@@ -121,7 +124,7 @@ void PrintChar(char theChar)
 
 void PrintString(char* stringPointer)
 {
-    while(*stringPointer != NULL) {
+    while(*stringPointer != null) {
         PrintChar(*stringPointer);
         stringPointer++;
     }
@@ -180,7 +183,7 @@ int main(char** argv, int argc)
         //* Break the loop on read error, or when no more data is available
         
         if(!regs.Flags.Z || regs.Words.HL == 0) {
-            errorCode = (regs.Bytes.A == EOF ? 0 : regs.Bytes.A); //Ignore "End of file" error
+            errorCode = (regs.Bytes.A == ERR_EOF ? 0 : regs.Bytes.A); //Ignore "End of file" error
             break;
         }
         
@@ -190,7 +193,7 @@ int main(char** argv, int argc)
         
         for(i=0; i<chunkSize; i++) {
             theChar = Buffer[i];
-            if(theChar == CR || theChar == LF || theChar == TAB || (theChar >= 32 && theChar != BS)) {
+            if(theChar == CR || theChar == LF || theChar == TAB || (theChar >= SPACE && theChar != BS)) {
                 PrintChar(theChar);
             } else {
                 PrintChar('.');

@@ -7,7 +7,7 @@
 	;    X!=0 -> global vars will be placed at address X
 	;            (make sure that X>0x100+code size)
 	;
-	;    Assemble with sdasz80 or Nestor80 (1.3.4 or newer):
+	;    Assemble with either sdasz80 or Nestor80 (1.3.4 or newer):
 	;
 	;    sdasz80 -o crt0_msxdos_noargs.rel crt0_msxdos_noargs.asm
 	;    N80 crt0_msxdos_noargs.asm --discard-hash-prefix --build-type sdcc --accept-dot-prefix --output-file-extension rel

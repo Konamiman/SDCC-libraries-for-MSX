@@ -5,7 +5,7 @@ Adapted by Konamiman 5/2010
 This code is taken from here: http://www.di-mgt.com.au/src/sha1.c.txt
 Changes I have made:
 
-- Embedded sha1.h moved to its own file. golbal.h is still here.
+- Embedded sha1.h moved to its own file.
 - All the calculation macros have been converted to functions.
   Otherwise the resulting code is a monster that exceeds the 64K once compiled.
 - Function SHSTransform substituted for another one much shorter,
@@ -59,8 +59,8 @@ effort (for example the reengineering of a great many Capstone chips).
 
 /* global.h */
 
-#ifndef _GLOBAL_H_
-#define _GLOBAL_H_ 1
+#ifndef __GLOBAL_H
+#define __GLOBAL_H
 
 /* POINTER defines a generic pointer type */
 typedef unsigned char *POINTER;
@@ -76,7 +76,7 @@ typedef unsigned char BYTE;
   #define TRUE	( !FALSE )
 #endif /* TRUE */
 
-#endif /* end _GLOBAL_H_ */
+#endif /* end __GLOBAL_H */
 
 static void SHAtoByte(BYTE *output, UINT4 *input, unsigned int len);
 
@@ -171,7 +171,7 @@ UINT4 ROTL(int n, UINT4 X)  {return ( ( ( X ) << n ) | ( ( X ) >> ( 32 - n ) ) )
 
 /* Initialize the SHS values */
 
-void SHAInit(SHA_CTX *shsInfo)
+void SHA1_Init(SHA1_CTX *shsInfo)
 {
     //endianTest(&shsInfo->Endianness);
     /* Set the h-vars to their initial values */
@@ -399,7 +399,7 @@ static void longReverse(UINT4 *lbuffer, int byteCount)
 
 /* Update SHS for a block of thedata */
 
-void SHAUpdate(SHA_CTX *shsInfo, BYTE *buffer, unsigned long count)
+void SHA1_Update(SHA1_CTX *shsInfo, BYTE *buffer, unsigned long count)
 {
     UINT4 tmp;
     int dataCount;
@@ -450,7 +450,7 @@ void SHAUpdate(SHA_CTX *shsInfo, BYTE *buffer, unsigned long count)
 /* Final wrapup - pad to SHS_DATASIZE-byte boundary with the bit pattern
    1 0* (64-bit count of bits processed, MSB-first) */
 
-void SHAFinal(BYTE *output, SHA_CTX *shsInfo)
+void SHA1_Final(BYTE *output, SHA1_CTX *shsInfo)
 {
     int count;
     BYTE *dataPtr;
@@ -534,13 +534,13 @@ char *dig3 = "34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F";
 
 main()
 {
-	SHA_CTX sha;
+	SHA1_CTX sha;
 	int i;
 	BYTE big[1000];
 
-	SHAInit(&sha);
-	SHAUpdate(&sha, message, 3);
-	SHAFinal(digest, &sha);
+	SHA1_Init(&sha);
+	SHA1_Update(&sha, message, 3);
+	SHA1_Final(digest, &sha);
 
 	for (i = 0; i < 20; i++)
 	{
@@ -550,9 +550,9 @@ main()
 	printf("\n");
 	printf(" %s <= correct\n", dig1);
 
-	SHAInit(&sha);
-	SHAUpdate(&sha, mess56, 56);
-	SHAFinal(digest, &sha);
+	SHA1_Init(&sha);
+	SHA1_Update(&sha, mess56, 56);
+	SHA1_Final(digest, &sha);
 
 	for (i = 0; i < 20; i++)
 	{
@@ -566,11 +566,11 @@ main()
 	for (i = 0; i < 1000; i++)
 		big[i] = 'a';
 
-	SHAInit(&sha);
+	SHA1_Init(&sha);
 	/* Digest 1 million x 'a' */
 	for (i = 0; i < 1000; i++)
-		SHAUpdate(&sha, big, 1000);
-	SHAFinal(digest, &sha);
+		SHA1_Update(&sha, big, 1000);
+	SHA1_Final(digest, &sha);
 
 	for (i = 0; i < 20; i++)
 	{

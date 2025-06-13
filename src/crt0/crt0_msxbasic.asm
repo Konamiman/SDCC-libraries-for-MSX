@@ -2,14 +2,15 @@
 	;
 	;    Change the .org directive as appropriate for your program
 	;
-	;    To assemble it:
+	;    Assemble with either sdasz80 or Nestor80 (v1.3.4 or newer):
+	;
 	;    sdasz80 -o crt0_msxbasic.rel crt0_msxbasic.s
+	;    N80 crt0_msxbasic.asm crt0_msxbasic.rel --build-type sdcc --accept-dot-prefix --discard-hash-prefix
 	;
 	;    Compile programs with --code-loc <org address + 32> --data-loc X
 	;    X=0  -> global vars will be placed immediately after code
 	;    X!=0 -> global vars will be placed at address X
 	
-	.module crt0
 	.globl	_main
 
     .globl  l__INITIALIZER

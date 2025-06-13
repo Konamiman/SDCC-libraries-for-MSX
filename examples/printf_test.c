@@ -1,4 +1,8 @@
-// sdcc -mz80 --no-std-crt0 --code-loc 0x110 --data-loc 0 crt0_msxdos_noargs.rel putchar_msxdos.rel printf_simple.rel printf_test.c
+// For MSX-DOS:
+// sdcc -mz80 --no-std-crt0 --code-loc 0x0110 --data-loc 0 crt0_msxdos_noargs.rel putchar_msxdos.rel printf_simple.rel printf_test.c
+//
+// For MSX-BASIC:
+// sdcc -mz80 --no-std-crt0 --code-loc 0xA020 --data-loc 0 crt0_msxbasic.rel putchar_msxbasic.rel printf_simple.rel printf_test.c
 
 #include <stdio.h>
 

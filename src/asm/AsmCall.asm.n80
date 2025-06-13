@@ -6,26 +6,11 @@
     ld      ix,4
     add     ix,sp
 
-    ifdef SDCC_CALL_0
-
-    ld      l,(ix)  ;HL=Routine address
-    ld      h,(ix+1)
-    ld      e,(ix+2) ;DE=regs address
-    ld      d,(ix+3)
-    push    de
-    ld      a,(ix+5) ;A=out registers detail
-    push    af
-    ld	    a,(ix+4) ;A=in registers detail
-
-    else
-
     push    de
     ld      a,(ix+1) ;A=out registers detail
     push    af
     ld	    a,(ix)   ;A=in registers detail
     
-    endif
-
     push    de
     pop     ix   ;IX=&Z80regs
 
@@ -108,11 +93,17 @@ CONT:
     exx		;Main HLDEBC
 
     ex	    af,af
-    pop 	ix
-    ret
+    jr CALL_END2
 
 CALL_END:
     ex	    af,af
     pop	    hl
+CALL_END2:
     pop 	ix
+
+    pop hl
+    inc sp
+    inc sp
+    push hl
+    
     ret

@@ -7,7 +7,6 @@ Compilation command:
 sdcc -mz80 -c --disable-warning 196 hmac-sha1.c
 
 (depends on the sha1 library)
-
 */
 
 
@@ -46,9 +45,9 @@ void memxor (void* dest, void* src, int n)
 #include "sha1.h"
 #include <string.h>
 
-  SHA_CTX inner;
-  SHA_CTX outer;
-  SHA_CTX keyhash;
+  SHA1_CTX inner;
+  SHA1_CTX outer;
+  SHA1_CTX keyhash;
   char optkeybuf[20];
   char block[SHA1_BLOCKSIZE];
   char innerhash[20];
@@ -60,9 +59,9 @@ void hmac_sha1 (const void *key, int keylen, const void *in, int inlen, void *re
 
   if (keylen > SHA1_BLOCKSIZE)
     {
-      SHAInit(&keyhash);
-      SHAUpdate(&keyhash, key, keylen);
-      SHAFinal(optkeybuf, &keyhash);
+      SHA1_Init(&keyhash);
+      SHA1_Update(&keyhash, key, keylen);
+      SHA1_Final(optkeybuf, &keyhash);
 
       key = optkeybuf;
       keylen = 20;
@@ -73,20 +72,20 @@ void hmac_sha1 (const void *key, int keylen, const void *in, int inlen, void *re
   memset(block, IPAD_BYTE, SHA1_BLOCKSIZE);
   memxor(block, key, keylen);
 
-  SHAInit(&inner);
-  SHAUpdate(&inner, block, SHA1_BLOCKSIZE);
-  SHAUpdate(&inner, in, inlen);
+  SHA1_Init(&inner);
+  SHA1_Update(&inner, block, SHA1_BLOCKSIZE);
+  SHA1_Update(&inner, in, inlen);
 
-  SHAFinal(innerhash, &inner);
+  SHA1_Final(innerhash, &inner);
 
   /* Compute result from KEY and INNERHASH.  */
 
   memset(block, OPAD_BYTE, SHA1_BLOCKSIZE);
   memxor(block, key, keylen);
 
-  SHAInit(&outer);
-  SHAUpdate(&outer, block, SHA1_BLOCKSIZE);
-  SHAUpdate(&outer, innerhash, 20);
+  SHA1_Init(&outer);
+  SHA1_Update(&outer, block, SHA1_BLOCKSIZE);
+  SHA1_Update(&outer, innerhash, 20);
 
-  SHAFinal(resbuf, &outer);
+  SHA1_Final(resbuf, &outer);
 }

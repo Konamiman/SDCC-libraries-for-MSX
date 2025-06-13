@@ -8,7 +8,7 @@
 ;    X!=0 -> global vars will be placed at address X
 ;            (make sure that X>0x100+code size)
 ;
-;    Assemble with sdasz80 or Nestor80 (1.3.4 or newer):
+;    Assemble with either sdasz80 or Nestor80 (1.3.4 or newer):
 ;
 ;    sdasz80 -o crt0_msxdos.rel crt0_msxdos.asm
 ;    N80 crt0_msxdos.asm --discard-hash-prefix --build-type sdcc --accept-dot-prefix --output-file-extension rel
@@ -24,7 +24,7 @@
         .org    0x0100  ;MSX-DOS .COM programs start address
 
         ;--- Step 1: Initialize globals
-        ld      a,(#0x80)
+
 init:   call    gsinit
 
         ;--- Step 2: Build the parameter pointers table on 0x100,
@@ -86,7 +86,7 @@ parloop: ld      a,(hl)
         ;* Parameter found: add its address to params table...
 
 parfnd: ld      (ix),l
-        ld      (ix+1),h
+        ld      1(ix),h
         inc     ix
         inc     ix
         inc     c
@@ -117,12 +117,12 @@ parloopend:
         
         ;* Command line processing done. Here, C=number of parameters.
 
-cont:   ld      hl,#0x100
-        ld      b,#0
-        push    bc      ;Pass info as parameters to "main"
-        push    hl
+cont:   ld      hl,#0x100 ;char **argv
+        ld      d,#0
+        ld      e,c     ;int argc
 
         ;--- Step 3: Call the "main" function
+
 	push de
 	ld de,#_HEAP_start
 	ld (_heap_top),de
@@ -134,7 +134,7 @@ cont:   ld      hl,#0x100
         ;    Termination code for DOS 2 was returned on L.
                 
         ld      c,#0x62   ;DOS 2 function for program termination (_TERM)
-        ld      b,l
+        ld      b,e
         call    5      ;On DOS 2 this terminates; on DOS 1 this returns...
         ld      c,#0x0
         jp      5      ;...and then this one terminates
