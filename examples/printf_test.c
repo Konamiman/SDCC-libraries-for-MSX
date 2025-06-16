@@ -1,8 +1,13 @@
-// For MSX-DOS:
-// sdcc -mz80 --no-std-crt0 --code-loc 0x0110 --data-loc 0 crt0_msxdos_noargs.rel putchar_msxdos.rel printf_simple.rel printf_test.c
-//
-// For MSX-BASIC:
-// sdcc -mz80 --no-std-crt0 --code-loc 0xA020 --data-loc 0 crt0_msxbasic.rel putchar_msxbasic.rel printf_simple.rel printf_test.c
+/* Example of a program using the simplified printf function.
+
+   For MSX-DOS, compile with:
+   sdcc -mz80 --no-std-crt0 --code-loc 0x0110 --data-loc 0 crt0_msxdos_noargs.rel putchar_msxdos.rel printf_simple.rel printf_test.c
+   objcopy -I ihex -O binary printf_test.ihx pftest.com
+
+   For MSX-BASIC, compile with:
+   sdcc -mz80 --no-std-crt0 --code-loc 0xA020 --data-loc 0 crt0_msxbasic.rel putchar_msxbasic.rel printf_simple.rel printf_test.c
+   objcopy -I ihex -O binary printf_test.ihx pftest.bin
+*/
 
 #include <stdio.h>
 

@@ -1,6 +1,11 @@
-// sdcc -mz80 -c --opt-code-size sha1.c
+/* Example of a program using the -SHA1 library.
 
-// Example: sha1 hash of "hello" is AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D
+   Compile with:
+   sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 crt0_msxdos.rel sha1.rel putchar_msxdos.rel printf_simple.rel sha1_test.c
+   objcopy -I ihex -O binary sha1_test.ihx sha1test.com
+
+   Example: the sha1 hash of "hello" is AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D
+*/
 
 #include "../src/sha1/sha1.h"
 #include <stdio.h>

@@ -1,4 +1,9 @@
-// sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 crt0_msxdos.rel base64.rel putchar_msxdos.rel printf_simple.rel base64_test.c
+/* Example of a program using the base64 library.
+
+   Compile with:
+   sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 crt0_msxdos.rel base64.rel putchar_msxdos.rel printf_simple.rel base64_test.c
+   objcopy -I ihex -O binary base64_test.ihx b64test.com
+*/
 
 #include "../src/base64/base64.h"
 #include <stdio.h>

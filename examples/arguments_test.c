@@ -1,4 +1,10 @@
-//sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 crt0_msxdos.rel putchar_msxdos.rel printf_simple.rel arguments_test.c
+/* Example of a program using the crt0_msxdos header.
+
+   Compile with:
+
+   sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 crt0_msxdos.rel putchar_msxdos.rel printf_simple.rel arguments_test.c
+   objcopy -I ihex -O binary arguments_test.ihx argstest.com
+*/
 
 #include <stdio.h>
 

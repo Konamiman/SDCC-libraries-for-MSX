@@ -19,7 +19,7 @@ The `src` directory contains:
 
 As a rule of thumb assembler sources (files with `.asm` extension) can be assembled with either sdasz80 (the assembler that comes bundled with the SDCC install) or [Nestor80](https://github.com/Konamiman/Nestor80) (version 1.3.4 or newer). See the header comment in each source file for more details.
 
-The `examples` directory contains some example programs that make use of the libraries, as well as a makefile that you can use as guidance for your own projects. The makefile 
+The `examples` directory contains some example programs that make use of the libraries, as well as a makefile that you can use as guidance for your own projects.
 
 
 ## How to use

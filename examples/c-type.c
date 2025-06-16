@@ -1,5 +1,4 @@
 /* Example of application using ASM library, the SDCC ASM interop library
-   By Konamiman 2/2010
    
    This application displays the contents of the file specified at command line,
    much like the COMMAND.COM command TYPE, but replacing non-printable
@@ -11,8 +10,7 @@
    
    To keep things simple it works on MSX-DOS 2 only.
   
-   Compilation command line:
-
+   Compile with:
    sdcc -mz80 --no-std-crt0 --code-loc 0x0180 --data-loc 0 --disable-warning 196 crt0_msxdos.rel asm_call.rel DosCall.rel c-type.c
    objcopy -I ihex -O binary c-type.ihx ctype.com
 */
