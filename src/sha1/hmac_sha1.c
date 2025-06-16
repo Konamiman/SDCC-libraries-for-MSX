@@ -1,6 +1,5 @@
 /*
-SHA1 library code for Z80/SDCC
-Adapted by Konamiman 5/2010
+SHA1 library code for Z80/SDCC - adapted by Konamiman
 
 Compilation command:
 

@@ -1,14 +1,13 @@
 /*
-   Simplified printf and sprintf for SDCC+Z80
-   (c) 2018 Konamiman - www.konamiman.com
+   Simplified printf and sprintf functions for SDCC+Z80 - by Konamiman
 
    This version is about 1.5K smaller than the one contained
-   in the z80 library supplied with SDCC
+   in the z80 library supplied with SDCC.
 
    To compile:
    sdcc -mz80 -c --max-allocs-per-node 100000 --allow-unsafe-read --opt-code-size [-DSUPPORT_LONG] printf_simple.c
 
-   Add -DSUPPORT_LONG to enable support for long integers
+   Add -DSUPPORT_LONG to enable support for long integers.
    
    Supported format specifiers:
 

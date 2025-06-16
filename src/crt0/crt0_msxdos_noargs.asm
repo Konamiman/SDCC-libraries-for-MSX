@@ -1,16 +1,18 @@
-	;--- crt0.asm for MSX-DOS - by Konamiman & Avelino, 11/2004
-	;    Simple version: doesn't include arguments and allows "void main()" only.
-	;    Applications can still manage arguments by themselves.
+	; Header file for MSX-DOS programs - by Konamiman & Avelino
 	;
-	;    Compile programs with --code-loc 0x108 --data-loc X
-	;    X=0  -> global vars will be placed immediately after code
-	;    X!=0 -> global vars will be placed at address X
-	;            (make sure that X>0x100+code size)
+	; This is a simplified header that doesn't accept command line arguments
+	; or a return value, so programs using it must have "void main()"
+	; as the signature for the main method.
 	;
-	;    Assemble with either sdasz80 or Nestor80 (1.3.4 or newer):
+	; This source can be assembled with either sdasz80 or Nestor80 (v1.3.4 or newer).
+	; Assemble with either of:
+	; sdasz80 -o crt0_msxdos_noargs.rel crt0_msxdos_noargs.s
+	; N80 crt0_msxdos_noargs.asm crt0_msxdos_noargs.rel --build-type sdcc --accept-dot-prefix --discard-hash-prefix
 	;
-	;    sdasz80 -o crt0_msxdos_noargs.rel crt0_msxdos_noargs.asm
-	;    N80 crt0_msxdos_noargs.asm --discard-hash-prefix --build-type sdcc --accept-dot-prefix --output-file-extension rel
+	; Compilation command line for programs using this header:
+	; sdcc -mz80 --no-std-crt0 --code-loc 0x108 --data-loc X crt0_msxdos_noargs.rel <other .rel files> <program source file>
+	; X=0  -> global variables will be placed immediately after code
+	; X!=0 -> global variables will be placed at address X
 
 	.globl	_main
 

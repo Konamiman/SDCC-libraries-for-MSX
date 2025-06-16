@@ -1,6 +1,5 @@
 /*
-SHA1 library code for Z80/SDCC
-Adapted by Konamiman 5/2010
+SHA1 library code for Z80/SDCC - adapted by Konamiman
 
 This code is taken from here: http://www.di-mgt.com.au/src/sha1.c.txt
 Changes I have made:
@@ -18,7 +17,6 @@ Changes I have made:
 Compilation command:
 
 sdcc -mz80 -c sha1.c
-
 */
 
 

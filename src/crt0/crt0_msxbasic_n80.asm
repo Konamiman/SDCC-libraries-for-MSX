@@ -3,21 +3,19 @@
 	; Programs compiled with this header can be loaded in MSX-BASIC
 	; with the BLOAD instruction: BLOAD "filename"[,R]
 	;
-	; This source can be assembled with either sdasz80 or Nestor80 (v1.3.4 or newer).
-	; You need to set the program start address appropriately for your project
-	; (it's the argument to the .org statement).
-	; Assemble with either of:
-	; sdasz80 -o crt0_msxbasic.rel crt0_msxbasic.s
-	; N80 crt0_msxbasic_n80.asm crt0_msxbasic.rel --build-type sdcc --accept-dot-prefix --discard-hash-prefix
-	;
-	; The crt0_msxbasic_n80.asm variant accepts the start address as a command line argument
-	; and can be assembled with Nestor80 only.
+	; This source needs to be assembled with Nestor80 (v1.3.4 or newer)
+	; and accepts the program start address as a command line argument. Assemble with:
+	; N80 crt0_msxbasic_n80.asm crt0_msxbasic.rel --build-type sdcc --accept-dot-prefix --discard-hash-prefix --define-symbol START_ADDRESS=xxxxh
 	;
 	; Compilation command line for programs using this header:
 	; sdcc -mz80 --no-std-crt0 --code-loc <start address + 32> --data-loc X crt0_msxbasic.rel <other .rel files> <program source file>
 	; X=0  -> global variables will be placed immediately after code
-	; X!=0 -> global variables will be placed at address X
+	; X!=0 -> global vars variables be placed at address X
 	
+	ifndef START_ADDRESS
+	.error Missing start address. Pass it to N80 like this: --define-symbol START_ADDRESS=xxxxh
+	endif
+
 	.globl	_main
 
     .globl  l__INITIALIZER
@@ -26,21 +24,21 @@
 
 	.area _HEADER (ABS)
 
-	.org    0xA000
-    .db 	0xFE
-    .dw 	init
-    .dw		end
-    .dw 	init
+	org    START_ADDRESS
+    db 	0xFE
+    dw 	init
+    dw		end
+    dw 	init
 
 	;--- Initialize globals and jump to "main"
 
 init:
-    ld	bc, #l__INITIALIZER
+    ld	bc, l__INITIALIZER
 	ld	a, b
 	or	a, c
 	jp	z,_main
-	ld	de, #s__INITIALIZED
-	ld	hl, #s__INITIALIZER
+	ld	de, s__INITIALIZED
+	ld	hl, s__INITIALIZER
 	ldir
 
 	jp    _main

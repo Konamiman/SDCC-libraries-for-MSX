@@ -1,11 +1,13 @@
-    ; Assemble with either sdasz80 or NEstor80 (version 1.3.4 or newer);
+    ; Function to interface with assembler code from C programs
+    ; with explicit Z80 input and output register specification - by Konamiman
     ;
+    ; Assemble with either sdasz80 or Nestor80 (version 1.3.4 or newer);
     ; sdasz80 -o asm_call.rel asm_call.asm
     ; N80 asm_call.asm asm_call.rel --discard-hash-prefix
 
-    ; void AsmCall(uint address, Z80_registers* regs, register_usage inRegistersDetail, register_usage outRegistersDetail)
-
     .area _CODE
+
+    ; void AsmCall(uint address, Z80_registers* regs, register_usage inRegistersDetail, register_usage outRegistersDetail)
 
 _AsmCall::
     push    ix
@@ -108,7 +110,10 @@ CALL_END:
 CALL_END2:
     pop 	ix
 
-    pop hl
+	; In SDCC with calling convention 1 the calle is responsible
+	; for cleaning up the stack before returning
+
+    pop hl  ;remove "inRegistersDetail" and "outRegistersDetail"
     inc sp
     inc sp
     push hl

@@ -1,13 +1,13 @@
-; Base64 library for SDCC
-; By Konamiman, 8/2010
+; Base64 library for SDCC - by Konamiman
 ;
 ; Assemble with either sdasz80 or Nestor80 (version 1.3.4 or newer):
 ;
 ; sdasz80 -o base64.rel base64.asm
+; N80 base64.asm base64.rel --accept-dot-prefix --discard-hash-prefix
 
 	.area	_CODE
 
-;void Base64Init(byte charsPerLine)
+	;void Base64Init(byte charsPerLine)
 
 _Base64Init::
 
@@ -49,7 +49,7 @@ B64_INIT2:
 	ret
 
 
-;uint Base64EncodeChunk(byte* source, byte* destination, uint length, byte final)
+	;uint Base64EncodeChunk(byte* source, byte* destination, uint length, byte final)
 
 _Base64EncodeChunk::
 	push	ix
@@ -376,7 +376,7 @@ B64_ENC2:
 	jr	B64_ENCEND2
 
 
-;uint Base64DecodeChunk(byte* source, byte* destination, uint length, byte final, byte* error)
+	;uint Base64DecodeChunk(byte* source, byte* destination, uint length, byte final, byte* error)
 
 _Base64DecodeChunk::
 	push	ix

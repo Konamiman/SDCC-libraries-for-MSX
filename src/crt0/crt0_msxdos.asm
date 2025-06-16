@@ -1,17 +1,20 @@
-;--- crt0.asm for MSX-DOS - by Konamiman, 11/2004
-;    Advanced version: allows "int main(char** argv, int argc)",
-;    the returned value will be passed to _TERM on DOS 2,
-;    argv is always 0x100 (the startup code memory is recycled).
-;
-;    Compile programs with --code-loc 0x180 --data-loc X
-;    X=0  -> global vars will be placed immediately after code
-;    X!=0 -> global vars will be placed at address X
-;            (make sure that X>0x100+code size)
-;
-;    Assemble with either sdasz80 or Nestor80 (1.3.4 or newer):
-;
-;    sdasz80 -o crt0_msxdos.rel crt0_msxdos.asm
-;    N80 crt0_msxdos.asm --discard-hash-prefix --build-type sdcc --accept-dot-prefix --output-file-extension rel
+
+	; Header file for MSX-DOS programs - by Konamiman & Avelino
+	;
+	; This is a full header that handles command line arguments
+        ; and accepts a return value for the OS (the later works in MSX-DOS 2 only),
+	; so programs using it must have the standard "int main(char *argv, int argc)"
+	; as the signature for the main method.
+	;
+	; This source can be assembled with either sdasz80 or Nestor80 (v1.3.4 or newer).
+	; Assemble with either of:
+	; sdasz80 -o crt0_msxdos.rel crt0_msxdos.s
+	; N80 crt0_msxdos.asm crt0_msxdos.rel --build-type sdcc --accept-dot-prefix --discard-hash-prefix
+	;
+	; Compilation command line for programs using this header:
+	; sdcc -mz80 --no-std-crt0 --code-loc 0x180 --data-loc X crt0_msxdos_noargs.rel <other .rel files> <program source file>
+	; X=0  -> global variables will be placed immediately after code
+	; X!=0 -> global variables will be placed at address X
 
 	.globl	_main
 
