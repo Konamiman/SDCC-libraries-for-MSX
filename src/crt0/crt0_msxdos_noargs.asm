@@ -42,30 +42,39 @@ __pre_main:
 	pop de
 	jp _main
 
+	.area	_HOME
 	.area	_DATA
-
 _heap_top::
 	.dw 0
 
-        .area   _GSINIT
-gsinit::
-        ld	bc,#l__INITIALIZER
-        ld	a,b
-        or	a,c
-        jp	z,gsinext
-        ld	de,#s__INITIALIZED
-        ld	hl,#s__INITIALIZER
-        ldir
-gsinext:
-        .area   _GSFINAL
-        ret
-
-	;* These doesn't seem to be necessary... (?)
-
-	;.area  _OVERLAY
-	;.area	_HOME
-	;.area  _BSS
+	.area	_INITIALIZED
 
 	.area	_HEAP
-
 _HEAP_start::
+
+	.area	_INITIALIZER
+	.area	_GSINIT
+gsinit::
+	ld	bc,#l__INITIALIZER
+	ld	a,b
+	or	a,c
+	jp	z,gsinext
+	ld	de,#s__INITIALIZED
+	ld	hl,#s__INITIALIZER
+	ldir
+gsinext:
+	.area	_GSFINAL
+	ret
+
+	;--- One-use code area (reusable code memory for heap)
+	;* Be aware about heap usage by this code area functions
+	;* Use _HEAP_disposable instead in this code area
+	.area	_DISPOSABLE
+
+	.area _HEAP_DISP
+_HEAP_disposable::
+
+	;* These doesn't seem to be necessary... (?)
+	;.area	_OVERLAY
+	;.area	_BSS
+
