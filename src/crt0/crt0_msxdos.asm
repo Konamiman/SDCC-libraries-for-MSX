@@ -148,11 +148,18 @@ cont:   ld      hl,#0x100 ;char **argv
 	;* Place data after program code, and data init code after data
 
 	.area	_CODE
+	.area	_HOME
 	.area	_DATA
 _heap_top::
 	.dw 0
 
-        .area   _GSINIT
+	.area	_INITIALIZED
+
+	.area	_HEAP
+_HEAP_start::
+
+	.area	_INITIALIZER
+	.area	_GSINIT
 gsinit::
         ld	bc,#l__INITIALIZER
         ld	a,b
@@ -162,14 +169,18 @@ gsinit::
         ld	hl,#s__INITIALIZER
         ldir
 gsinext:
-        .area   _GSFINAL
+    .area   _GSFINAL
         ret
 
-	;* These don't seem to be necessary... (?)
+	;--- One-use code area (reusable code memory for heap)
+	;* Be aware about heap usage by this code area functions
+	;* Use _HEAP_disposable instead in this code area
+	.area	_DISPOSABLE
 
-        ;.area  _OVERLAY
-	;.area	_HOME
-        ;.area  _BSS
-	.area	_HEAP
+	.area _HEAP_DISP
+_HEAP_disposable::
 
-_HEAP_start::
+	;* These doesn't seem to be necessary... (?)
+	;.area	_OVERLAY
+	;.area	_BSS
+
