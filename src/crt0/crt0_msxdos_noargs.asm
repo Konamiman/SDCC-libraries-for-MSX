@@ -55,16 +55,16 @@ _HEAP_start::
 	.area	_INITIALIZER
 	.area	_GSINIT
 gsinit::
-	ld	bc,#l__INITIALIZER
-	ld	a,b
-	or	a,c
-	jp	z,gsinext
-	ld	de,#s__INITIALIZED
-	ld	hl,#s__INITIALIZER
-	ldir
+    ld	bc,#l__INITIALIZER
+    ld	a,b
+    or	a,c
+    jp	z,gsinext
+    ld	de,#s__INITIALIZED
+    ld	hl,#s__INITIALIZER
+    ldir
 gsinext:
-	.area	_GSFINAL
-	ret
+    .area    _GSFINAL
+    ret
 
 	;--- One-use code area (reusable code memory for heap)
 	;* Be aware about heap usage by this code area functions
